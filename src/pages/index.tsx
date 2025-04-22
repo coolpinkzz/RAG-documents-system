@@ -5,7 +5,7 @@ import MainLayout from '@/components/layout/MainLayout';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import ProtectedRoute from '@/lib/protectedRoute';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 import { Document, IngestionJob } from '@/types';
 import { mockDocuments, mockIngestionJobs } from '@/lib/mockData';
 

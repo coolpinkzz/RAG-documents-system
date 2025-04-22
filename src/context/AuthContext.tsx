@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function loadUserFromSession() {
       try {
-        const response = await fetchWithAuth<User>('/user');
+        const response = await fetchWithAuth<User>('/api/user');
         if (response.success && response.data) {
           setUser(response.data);
         }
@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
     
     try {
-      const response = await fetchWithAuth<User>('/login', {
+      const response = await fetchWithAuth<User>('/api/login', {
         method: 'POST',
         body: JSON.stringify(credentials),
       });
@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
     
     try {
-      const response = await fetchWithAuth<User>('/register', {
+      const response = await fetchWithAuth<User>('/api/register', {
         method: 'POST',
         body: JSON.stringify(credentials),
       });
@@ -101,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     
     try {
-      const response = await fetchWithAuth('/logout', {
+      const response = await fetchWithAuth('/api/logout', {
         method: 'POST',
       });
       

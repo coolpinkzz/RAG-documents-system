@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
-import { AuthProvider } from '@/hooks/useAuth';
+import { AuthProvider } from '@/context/AuthContext';
 import '@/styles/globals.css';
 
 export default function App({ Component, pageProps }: AppProps) {
