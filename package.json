@@ -12,7 +12,6 @@
   "author": "",
   "license": "ISC",
   "description": "",
-  "type": "module",
   "dependencies": {
     "@langchain/community": "^0.3.41",
     "@langchain/core": "^0.3.49",
