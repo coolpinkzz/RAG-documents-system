@@ -4,7 +4,6 @@ import path from "path";
 import { createClient } from "@supabase/supabase-js";
 import { parseForm } from "@/lib/parseForm"; // the helper you created above
 import formidable from "formidable";
-import { formatBytes } from "@/lib/formatBytes";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

@@ -8,7 +8,7 @@ export function parseForm(
   const form = formidable({
     multiples: false,
     keepExtensions: true,
-    uploadDir: path.join(process.cwd(), "uploads-temp"),
+    uploadDir: path.join(process.cwd(), "uploads"),
   });
 
   return new Promise((resolve, reject) => {
