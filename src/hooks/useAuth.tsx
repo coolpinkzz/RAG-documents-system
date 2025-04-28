@@ -1,7 +1,13 @@
-import { useState, useEffect, useContext, createContext, ReactNode } from 'react';
-import { useRouter } from 'next/router';
-import api from '@/lib/api';
-import { User, LoginCredentials, RegisterCredentials } from '@/types';
+import {
+  useState,
+  useEffect,
+  useContext,
+  createContext,
+  ReactNode,
+} from "react";
+import { useRouter } from "next/router";
+import api from "@/lib/api";
+import { User, LoginCredentials, RegisterCredentials } from "@/types";
 
 interface AuthContextType {
   user: User | null;
@@ -27,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const checkAuthStatus = async () => {
       try {
         setLoading(true);
-        const response = await api.get('/api/user');
+        const response = await api.get("/api/user");
         setUser(response.data);
       } catch (error) {
         setUser(null);
@@ -43,11 +49,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.post('/api/login', credentials);
+      const response = await api.post("/api/login", credentials);
       setUser(response.data);
-      router.push('/');
+      router.push("/");
     } catch (error: any) {
-      setError(error.response?.data?.error || 'Login failed');
+      setError(error.response?.data?.error || "Login failed");
       throw error;
     } finally {
       setLoading(false);
@@ -58,11 +64,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.post('/api/register', credentials);
+      const response = await api.post("/api/register", credentials);
       setUser(response.data);
-      router.push('/');
+      router.push("/");
     } catch (error: any) {
-      setError(error.response?.data?.error || 'Registration failed');
+      setError(error.response?.data?.error || "Registration failed");
       throw error;
     } finally {
       setLoading(false);
@@ -72,11 +78,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       setLoading(true);
-      await api.post('/api/logout');
+      await api.post("/api/logout");
       setUser(null);
-      router.push('/auth');
+      router.push("/auth");
     } catch (error: any) {
-      setError(error.response?.data?.error || 'Logout failed');
+      setError(error.response?.data?.error || "Logout failed");
     } finally {
       setLoading(false);
     }
@@ -92,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         logout,
         isAuthenticated: !!user,
-        isAdmin: user?.role === 'admin',
+        isAdmin: user?.role === "admin",
       }}
     >
       {children}
@@ -103,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

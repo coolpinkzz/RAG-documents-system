@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
-import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import Select from '@/components/ui/Select';
-import { Document, IngestionJob } from '@/types';
-import { mockDocuments } from '@/lib/mockData';
-import { fetchWithAuth } from '@/lib/api';
+import { useState, useEffect } from "react";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import Select from "@/components/ui/Select";
+import { Document, IngestionJob } from "@/types";
+import { mockDocuments } from "@/lib/mockData";
+import { fetchWithAuth } from "@/lib/api";
 
 export default function IngestionTrigger() {
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [selectedDocumentId, setSelectedDocumentId] = useState<string>('');
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [triggering, setTriggering] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,13 +20,16 @@ export default function IngestionTrigger() {
         setLoading(true);
         // In a real application, this would fetch from the API
         // const response = await fetchWithAuth<Document[]>('/documents');
-        
+        const res = await fetch("/api/get-documents");
+        const data = await res.json();
+        console.log("data", data.documents);
         // For now, use the mock data (only showing documents that are not being processed)
-        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
-        setDocuments(mockDocuments.filter(doc => doc.status !== 'pending'));
+        setDocuments(
+          data.documents.filter((doc: { isInjected: any }) => !doc.isInjected)
+        );
       } catch (error) {
-        setError('Failed to fetch documents');
-        console.error('Error fetching documents:', error);
+        setError("Failed to fetch documents");
+        console.error("Error fetching documents:", error);
       } finally {
         setLoading(false);
       }
@@ -37,7 +40,7 @@ export default function IngestionTrigger() {
 
   const handleTriggerIngestion = async () => {
     if (!selectedDocumentId) {
-      setError('Please select a document');
+      setError("Please select a document");
       return;
     }
 
@@ -45,27 +48,39 @@ export default function IngestionTrigger() {
       setTriggering(true);
       setError(null);
       setSuccess(null);
-      
+
       // In a real application, this would call the API
       // await fetchWithAuth('/ingestion/jobs', {
       //   method: 'POST',
       //   body: JSON.stringify({ documentId: selectedDocumentId }),
       // });
-      
+      const getDocument = documents.find(
+        (doc) => doc.id === selectedDocumentId
+      );
+      await fetch("/api/ingestion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          documentId: selectedDocumentId,
+          documentTitle: getDocument?.title,
+          filePath: getDocument?.file,
+        }),
+      });
+
       // For now, simulate the ingestion trigger
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
-      
-      setSuccess('Ingestion started successfully');
-      setSelectedDocumentId('');
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API delay
+
+      setSuccess("Ingestion started successfully");
+      setSelectedDocumentId("");
     } catch (error) {
-      setError('Failed to trigger ingestion');
-      console.error('Error triggering ingestion:', error);
+      setError("Failed to trigger ingestion");
+      console.error("Error triggering ingestion:", error);
     } finally {
       setTriggering(false);
     }
   };
 
-  const documentOptions = documents.map(doc => ({
+  const documentOptions = documents.map((doc) => ({
     value: doc.id,
     label: doc.title,
   }));
@@ -92,8 +107,9 @@ export default function IngestionTrigger() {
 
           <div>
             <p className="text-sm text-gray-600 mb-4">
-              Select a document to process and make it available for search and Q&A. 
-              This will extract text, analyze content, and index the document.
+              Select a document to process and make it available for search and
+              Q&A. This will extract text, analyze content, and index the
+              document.
             </p>
 
             <Select
@@ -102,7 +118,7 @@ export default function IngestionTrigger() {
               value={selectedDocumentId}
               onChange={(e) => setSelectedDocumentId(e.target.value)}
               options={[
-                { value: '', label: 'Choose a document...' },
+                { value: "", label: "Choose a document..." },
                 ...documentOptions,
               ]}
               disabled={documentOptions.length === 0 || triggering}
@@ -121,7 +137,7 @@ export default function IngestionTrigger() {
               disabled={!selectedDocumentId || triggering}
               isLoading={triggering}
             >
-              {triggering ? 'Starting Ingestion...' : 'Start Ingestion'}
+              {triggering ? "Starting Ingestion..." : "Start Ingestion"}
             </Button>
           </div>
         </div>

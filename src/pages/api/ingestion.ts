@@ -1,108 +1,146 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { mockIngestionJobs } from '@/lib/mockData';
+import { NextApiRequest, NextApiResponse } from "next";
+import fs from "fs";
+import pdfParse from "pdf-parse";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { OpenAIEmbeddings } from "@langchain/openai";
+import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
+import { createClient } from "@supabase/supabase-js";
+import { supabase as supabaseVectorStoreClient } from "@/lib/supa-base-client"; // For vector storage
+import path from "path";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY!
+);
+
+// Helper to update progress
+async function updateIngestionProgress(
+  ingestionId: string,
+  progress: number,
+  status: string = "processing"
+) {
+  await supabase
+    .from("ingestions")
+    .update({ progress, status, updatedat: new Date().toISOString() })
+    .eq("id", ingestionId);
+}
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  // Handle GET request to fetch ingestion jobs
-  if (req.method === 'GET') {
+  if (req.method === "POST") {
     try {
-      // Extract query parameters
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
-      
-      // In a real application, we would fetch jobs from the database
-      // Filter by user ID, apply pagination, etc.
-      
-      // Apply limit if provided
-      const jobs = limit ? mockIngestionJobs.slice(0, limit) : mockIngestionJobs;
-      
-      return res.status(200).json({
-        success: true,
-        data: jobs
-      });
-    } catch (error) {
-      console.error('Get ingestion jobs error:', error);
-      return res.status(500).json({ 
-        success: false, 
-        error: 'Failed to fetch ingestion jobs. Please try again later.' 
-      });
-    }
-  }
-  
-  // Handle POST request to create a new ingestion job
-  if (req.method === 'POST') {
-    try {
-      const { documentId } = req.body;
-      
-      if (!documentId) {
-        return res.status(400).json({ 
-          success: false, 
-          error: 'Document ID is required' 
+      const { documentId, documentTitle, filePath } = req.body;
+
+      if (!documentId || !documentTitle || !filePath) {
+        return res.status(400).json({
+          message: "documentId, documentTitle, and filePath are required",
         });
       }
-      
-      // In a real application, we would create a new ingestion job in the database
-      // and start processing the document
-      
-      // For this mock implementation, we'll create a mock job
-      const newJob = {
-        id: `job-${Date.now()}`,
-        documentId,
-        documentTitle: 'Sample Document',
-        status: 'queued' as const,
-        progress: 0,
-        startedAt: new Date().toISOString()
-      };
-      
-      return res.status(201).json({
-        success: true,
-        data: newJob
+
+      // Step 1: Start ingestion record
+      const { data: ingestionData, error: ingestionError } = await supabase
+        .from("ingestions")
+        .upsert([
+          {
+            documentid: documentId,
+            documenttitle: documentTitle,
+            status: "processing",
+            progress: 0,
+            startedat: new Date().toISOString(),
+          },
+        ])
+        .select();
+
+      if (ingestionError) {
+        console.error("Error creating ingestion record:", ingestionError);
+        return res.status(500).json({ message: "Error creating ingestion" });
+      }
+
+      const ingestionId = ingestionData[0].id;
+
+      // Step 2: Start processing PDF
+      const finalfilePath = path.join(process.cwd(), "uploads", filePath);
+
+      const fileData = fs.readFileSync(finalfilePath);
+      const pdf = await pdfParse(fileData);
+      const text = pdf.text;
+
+      // Step 3: Split into chunks
+      const splitter = new RecursiveCharacterTextSplitter({
+        chunkSize: 500,
+        chunkOverlap: 50,
       });
+      const docs = await splitter.createDocuments([text]);
+
+      // Update progress to 30%
+      await updateIngestionProgress(ingestionId, 30, "completed");
+
+      await supabase
+        .from("uploads")
+        .update({ isInjected: true })
+        .eq("id", documentId);
+
+      // Step 4: Create embeddings and upload to Supabase vector store
+      const embeddings = new OpenAIEmbeddings();
+
+      SupabaseVectorStore.fromDocuments(docs, embeddings, {
+        client: supabaseVectorStoreClient,
+        tableName: "documents", // your vector table
+        queryName: "match_documents", // your matching function
+      });
+
+      // Step 5: Update progress to 100% and completed
+      setTimeout(() => {
+        updateIngestionProgress(ingestionId, 100, "completed");
+      }, 5000);
+
+      return res
+        .status(200)
+        .json({ message: "Ingestion and storage completed successfully!" });
     } catch (error) {
-      console.error('Create ingestion job error:', error);
-      return res.status(500).json({ 
-        success: false, 
-        error: 'Failed to create ingestion job. Please try again later.' 
-      });
+      console.error("Ingestion error:", error);
+      return res.status(500).json({ message: "Server error during ingestion" });
     }
   }
-  
-  // Handle PUT request to update a job (cancel, retry)
-  if (req.method === 'PUT') {
+
+  if (req.method === "GET") {
     try {
-      const { id, action } = req.body;
-      
-      if (!id || !action) {
-        return res.status(400).json({ 
-          success: false, 
-          error: 'Job ID and action are required' 
-        });
+      const { id } = req.query; // You can pass an ingestion ID to fetch a specific record
+
+      // If an ID is provided, fetch a specific ingestion record
+      if (id) {
+        const { data, error } = await supabase
+          .from("ingestions")
+          .select("*")
+          .eq("id", id) // Filter by ID
+          .single();
+
+        if (error) {
+          console.error(error);
+          return res
+            .status(500)
+            .json({ message: "Error fetching ingestion record" });
+        }
+
+        return res.status(200).json(data);
       }
-      
-      if (action !== 'cancel' && action !== 'retry') {
-        return res.status(400).json({ 
-          success: false, 
-          error: 'Invalid action. Supported actions: cancel, retry' 
-        });
+
+      // If no ID is provided, fetch all ingestion records
+      const { data, error } = await supabase.from("ingestions").select("*");
+
+      if (error) {
+        console.error(error);
+        return res
+          .status(500)
+          .json({ message: "Error fetching ingestion records" });
       }
-      
-      // In a real application, we would update the job in the database
-      // For this mock implementation, we'll just return success
-      
-      return res.status(200).json({
-        success: true,
-        message: `Job ${action === 'cancel' ? 'cancelled' : 'retried'} successfully`
-      });
+
+      return res.status(200).json(data); // Return all ingestion records
     } catch (error) {
-      console.error('Update ingestion job error:', error);
-      return res.status(500).json({ 
-        success: false, 
-        error: 'Failed to update ingestion job. Please try again later.' 
-      });
+      console.error(error);
+      return res.status(500).json({ message: "Server error" });
     }
   }
-  
-  // Handle any other HTTP method
-  return res.status(405).json({ success: false, error: 'Method not allowed' });
 }

@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "next.config.js",
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -10,18 +13,30 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@langchain/community": "^0.3.41",
+    "@langchain/core": "^0.3.49",
+    "@langchain/openai": "^0.5.7",
+    "@langchain/textsplitters": "^0.1.0",
+    "@supabase/supabase-js": "^2.49.4",
+    "@tailwindcss/postcss": "^4.1.4",
     "autoprefixer": "^10.4.21",
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
+    "formidable": "^3.5.4",
+    "langchain": "^0.3.24",
     "next": "^15.3.1",
     "next-auth": "^4.24.11",
+    "openai": "^4.96.0",
+    "pdf-parse": "^1.1.1",
     "postcss": "^8.5.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.4"
   },
   "devDependencies": {
+    "@types/formidable": "^3.4.5",
     "@types/node": "22.14.1",
+    "@types/pdf-parse": "^1.1.5",
     "@types/react": "19.1.2",
     "typescript": "5.8.3"
   }

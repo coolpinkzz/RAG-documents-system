@@ -1,8 +1,14 @@
+export interface IUserResponse {
+  success: boolean;
+  data: User;
+  error: any;
+}
+
 export interface User {
   id: string;
   username: string;
   email: string;
-  role: 'admin' | 'user';
+  role: "admin" | "user";
   createdAt: string;
 }
 
@@ -25,18 +31,23 @@ export interface Document {
   fileSize: number;
   uploadedBy: string;
   uploadedAt: string;
-  status: 'pending' | 'processed' | 'error';
+  status: "pending" | "processed" | "error";
+  file?: string;
+  created_at: string;
+  isInjected: boolean;
 }
 
 export interface IngestionJob {
   id: string;
   documentId: string;
   documentTitle: string;
-  status: 'queued' | 'processing' | 'completed' | 'failed';
+  status: "queued" | "processing" | "completed" | "failed";
   progress: number;
-  startedAt: string;
+  startedat?: string;
+  startedAt?: string;
   completedAt?: string;
   error?: string;
+  updatedat?: string;
 }
 
 export interface Question {
