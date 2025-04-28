@@ -1,26 +1,29 @@
-import { useState } from 'react';
-import Button from '@/components/ui/Button';
-import Textarea from '@/components/ui/Textarea';
+import { useState } from "react";
+import Button from "@/components/ui/Button";
+import Textarea from "@/components/ui/Textarea";
 
 interface QuestionFormProps {
   onSubmitQuestion: (question: string) => Promise<void>;
   isLoading: boolean;
 }
 
-export default function QuestionForm({ onSubmitQuestion, isLoading }: QuestionFormProps) {
-  const [question, setQuestion] = useState('');
+export default function QuestionForm({
+  onSubmitQuestion,
+  isLoading,
+}: QuestionFormProps) {
+  const [question, setQuestion] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!question.trim()) {
-      setError('Please enter a question');
+      setError("Please enter a question");
       return;
     }
-    
+
     setError(null);
-    
+
     try {
       await onSubmitQuestion(question);
       // Don't clear the question immediately to allow the user to see what they asked
@@ -41,17 +44,17 @@ export default function QuestionForm({ onSubmitQuestion, isLoading }: QuestionFo
         }}
         placeholder="e.g., What was our revenue growth last quarter?"
         rows={3}
-        error={error}
+        error={error as any}
         disabled={isLoading}
       />
-      
+
       <div className="flex justify-end">
         <Button
           type="submit"
           isLoading={isLoading}
           disabled={isLoading || !question.trim()}
         >
-          {isLoading ? 'Processing...' : 'Ask Question'}
+          {isLoading ? "Processing..." : "Ask Question"}
         </Button>
       </div>
     </form>

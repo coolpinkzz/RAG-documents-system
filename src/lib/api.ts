@@ -34,7 +34,7 @@ export async function fetchWithAuth<T>(
       url,
       method: options.method || "GET",
       data: options.body ? JSON.parse(options.body as string) : undefined,
-      headers: options.headers,
+      headers: options.headers as any,
     });
 
     return {

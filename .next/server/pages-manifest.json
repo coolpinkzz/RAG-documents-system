@@ -1,9 +1,0 @@
-{
-  "/_app": "pages/_app.js",
-  "/_error": "pages/_error.js",
-  "/_document": "pages/_document.js",
-  "/auth": "pages/auth.js",
-  "/ingestion": "pages/ingestion.js",
-  "/qa": "pages/qa.js",
-  "/documents": "pages/documents.js"
-}

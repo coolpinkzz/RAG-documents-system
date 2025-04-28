@@ -1,14 +1,15 @@
-import NextAuth, { NextAuthOptions } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import { mockUsers } from '@/lib/mockData';
+import NextAuth, { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { mockUsers } from "@/lib/mockData";
+import { User } from "@/types";
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      name: 'Credentials',
+      name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -17,8 +18,8 @@ export const authOptions: NextAuthOptions = {
 
         // In a real application, this would verify credentials against a database
         // Here we're using the mock data for demonstration
-        const user = mockUsers.find(user => user.email === credentials.email);
-        
+        const user = mockUsers.find((user) => user.email === credentials.email);
+
         // For the mock implementation, we'll accept any password for the mock users
         if (user) {
           return {
@@ -28,36 +29,36 @@ export const authOptions: NextAuthOptions = {
             role: user.role,
           };
         }
-        
+
         return null;
-      }
-    })
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role;
+        token.role = (user as User).role;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as 'admin' | 'user';
+        (session as any).user.id = token.id as string;
+        (session as any).user.role = token.role as "admin" | "user";
       }
       return session;
-    }
+    },
   },
   pages: {
-    signIn: '/auth',
-    error: '/auth',
+    signIn: "/auth",
+    error: "/auth",
   },
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  secret: process.env.NEXTAUTH_SECRET || 'your-secret-key',
+  secret: process.env.NEXTAUTH_SECRET || "your-secret-key",
 };
 
 export default NextAuth(authOptions);

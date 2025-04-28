@@ -81,6 +81,7 @@ export const mockIngestionJobs: IngestionJob[] = [
     progress: 100,
     startedAt: "2023-02-01T10:35:00Z",
     completedAt: "2023-02-01T10:40:00Z",
+    startedat: "2023-02-01T10:35:00Z",
   },
   {
     id: "2",
@@ -90,6 +91,7 @@ export const mockIngestionJobs: IngestionJob[] = [
     progress: 100,
     startedAt: "2023-02-15T14:25:00Z",
     completedAt: "2023-02-15T14:30:00Z",
+    startedat: "2023-02-15T14:25:00Z",
   },
   {
     id: "3",
@@ -98,6 +100,7 @@ export const mockIngestionJobs: IngestionJob[] = [
     status: "processing",
     progress: 45,
     startedAt: "2023-03-05T09:20:00Z",
+    startedat: "2023-03-05T09:20:00Z",
   },
 ];
 

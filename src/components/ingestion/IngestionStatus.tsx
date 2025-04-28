@@ -209,7 +209,7 @@ export default function IngestionStatus() {
             </Button>
           </div>
           <Table
-            columns={columns}
+            columns={columns as any}
             data={ingestionJobs}
             emptyMessage="No ingestion jobs found"
           />

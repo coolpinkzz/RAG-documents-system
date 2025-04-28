@@ -43,7 +43,7 @@ export interface IngestionJob {
   documentTitle: string;
   status: "queued" | "processing" | "completed" | "failed";
   progress: number;
-  startedat?: string;
+  startedat: string;
   startedAt?: string;
   completedAt?: string;
   error?: string;
