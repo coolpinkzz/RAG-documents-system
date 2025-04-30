@@ -2,6 +2,9 @@
 
 ### This project lets you upload documents, ingest them into a vector database (using Supabase and OpenAI embeddings), and retrieve information easily with Retrieval-Augmented Generation (RAG).
 
+## Technical Documentation
+check documentation [here](https://docs.google.com/document/d/1vCahYWF9CXrvVc7R0Sl92Q2Srx60-Mwodl6gsLqVmbY/edit?usp=sharing)
+
 ## ✨ Features
 1. Upload PDF documents.
 2. Ingest document content into a vector database.
